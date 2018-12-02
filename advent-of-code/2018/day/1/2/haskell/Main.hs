@@ -18,4 +18,4 @@ firstFreqRepeat :: [Int] -> Int
 firstFreqRepeat = firstRepeat . scanl (+) 0 . cycle
 
 main :: IO ()
-main = print . firstFreqRepeat . map readInt . lines =<< readFile "../input"
+main = print . firstFreqRepeat . map readInt . lines =<< readFile "../../input"

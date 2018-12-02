@@ -6,5 +6,5 @@ readInt ('-':xs) = - read xs
 
 main :: IO ()
 main = do
-  input <- readFile "../input"
+  input <- readFile "../../input"
   print (sum (map readInt (lines input)))
