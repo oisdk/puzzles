@@ -7,15 +7,9 @@ def parse_coord(line):
     bx, by = rest.split('x')
     return (int(nm[1:]), int(tx), int(ty), int(bx), int(by))
 
-coords = list(map(parse_coord, open('../../input')))
+coords = list(map(parse_coord, open('../input')))
 
 for _ , tx, ty, bx, by in coords:
     for x in range(tx, tx+bx):
         for y in range(ty, ty+by):
             matrix[x][y] -= 1
-
-for nm, tx, ty, bx, by in coords:
-    no_overlap = all(matrix[x][y] == 1 for x in range(tx, tx+bx) for y in range(ty, ty+by))
-    if no_overlap:
-        print(nm)
-        break
