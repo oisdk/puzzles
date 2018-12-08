@@ -37,7 +37,7 @@ with open('../input') as inp:
                 schedules[cur_guard].sleep(date)
 
 schedules = {
-    key: [(start[:10], int(start[14:]), int(end[14:]))
+    key: [(int(start[14:]), int(end[14:]))
           for start, end in val._record]
     for key, val in schedules.items()
 }
