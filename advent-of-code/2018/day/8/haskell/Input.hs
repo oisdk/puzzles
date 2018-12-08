@@ -3,7 +3,6 @@ module Input where
 import Control.Monad.State
 import Data.Tree
 
-
 pop :: State [a] a
 pop = state (\(x:xs) -> (x, xs))
 
