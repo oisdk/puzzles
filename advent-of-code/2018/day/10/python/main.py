@@ -53,12 +53,14 @@ try:
         print_map([p.step(t) for p in points])
         screen.refresh()
 
-    while i < steps:
-        if screen.getch() == 32:
+    while i <= steps:
+        next_step(i)
+        if i == steps or screen.getch() == 32:
             screen.nodelay(False)
             while True:
                 c = screen.getch()
                 if c == 32:
+                    i += 1
                     break
                 elif c == curses.KEY_LEFT:
                     i -= 1
@@ -66,10 +68,9 @@ try:
                     i += 1
                 next_step(i)
             screen.nodelay(True)
-        next_step(i)
-        i += 1
-        curses.napms(int((secs * 1000) / steps))
-
+        else:
+            i += 1
+            curses.napms(int((secs * 1000) / steps))
 finally:
     curses.nocbreak()
     curses.echo()
