@@ -45,17 +45,21 @@ try:
 
     i = 0
 
-    def next_step(i):
+    def next_step(i, time=False):
         t = int(lower_bound + ((upper_bound - lower_bound) * (i / steps)))
         tstr = str(t)
         screen.clear()
-        screen.addstr(0, 0, tstr + '\n')
+        height, width = screen.getmaxyx()
+        if 0 <= i < steps:
+            screen.addstr(0, int(((width-1) * i) / steps), '|')
+        if time:
+            screen.addstr(0, 0, tstr)
         print_map([p.step(t) for p in points])
         screen.refresh()
 
     while i <= steps:
-        next_step(i)
         if i == steps or screen.getch() == 32:
+            next_step(i, time=True)
             screen.nodelay(False)
             while True:
                 c = screen.getch()
@@ -66,9 +70,10 @@ try:
                     i -= 1
                 elif c == curses.KEY_RIGHT:
                     i += 1
-                next_step(i)
+                next_step(i, time=True)
             screen.nodelay(True)
         else:
+            next_step(i)
             i += 1
             curses.napms(int((secs * 1000) / steps))
 finally:
