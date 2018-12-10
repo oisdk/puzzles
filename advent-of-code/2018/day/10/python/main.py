@@ -5,22 +5,9 @@ lower_bound = int(sys.argv[2])
 upper_bound = int(sys.argv[3])
 steps = upper_bound - lower_bound
 
-from collections import namedtuple
-
-
-class Point(namedtuple('Point', ['pos_x', 'pos_y', 'vel_x', 'vel_y'])):
-    def step(self, fac=1):
-        return Point(self.pos_x + self.vel_x * fac,
-                     self.pos_y + self.vel_y * fac, self.vel_x, self.vel_y)
-
-
 with open('../input') as inp:
-    points = [
-        Point(
-            int(line[10:16]),
-            int(line[18:24]), int(line[36:38]), int(line[40:42]))
-        for line in inp
-    ]
+    points = [(int(line[10:16]), int(line[18:24]), int(line[36:38]), int(
+        line[40:42])) for line in inp]
 
 import curses
 
@@ -33,28 +20,29 @@ try:
     screen.keypad(True)
 
     def print_map(points):
-        min_x = min(p.pos_x for p in points)
-        min_y = min(p.pos_y for p in points)
-        max_x = max(p.pos_x for p in points)
-        max_y = max(p.pos_y for p in points)
+        min_x, min_y, max_x, max_y = points[0][0], points[0][1], points[0][
+            0], points[0][1]
+        for x, y in points:
+            min_x, max_x, min_y, max_y = min(min_x, x), max(max_x, x), min(
+                min_y, y), max(max_y, y)
         height, width = screen.getmaxyx()
-        for p in points:
-            pos_y = int((height - 3) * ((p.pos_y - min_y) / (max_y - min_y)))
-            pos_x = int((width - 1) * ((p.pos_x - min_x) / (max_x - min_x)))
-            screen.addstr(pos_y + 1, pos_x, "●")
+        for x, y in points:
+            screen.addstr(
+                int((height - 3) * ((y - min_y) / (max_y - min_y))) + 1,
+                int((width - 1) * ((x - min_x) / (max_x - min_x))), "●")
 
     i = 0
 
     def next_step(i, time=False):
-        t = int(lower_bound + ((upper_bound - lower_bound) * (i / steps)))
-        tstr = str(t)
         screen.clear()
-        height, width = screen.getmaxyx()
+        _, width = screen.getmaxyx()
         if 0 <= i < steps:
-            screen.addstr(0, int(((width-1) * i) / steps), '|')
+            screen.addstr(0, int(((width - 1) * i) / steps), '|')
+        t = int(lower_bound + ((upper_bound - lower_bound) * (i / steps)))
         if time:
-            screen.addstr(0, 0, tstr)
-        print_map([p.step(t) for p in points])
+            screen.addstr(0, 0, str(t))
+        print_map([(pos_x + vel_x * t, pos_y + vel_y * t)
+                   for pos_x, pos_y, vel_x, vel_y in points])
         screen.refresh()
 
     while i <= steps:
