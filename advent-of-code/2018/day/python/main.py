@@ -23,7 +23,6 @@ def conv(coord):
     x, y, size = coord
     return x + 1, y + 1, size
 
-
 memo_dict = {}
 
 
@@ -35,8 +34,8 @@ def section_size(coord):
         if size == 0:
             memo_dict[coord] = 0
             return 0
-        t = sum(grid[y][x:x + size])
-        l = sum(row[x] for row in grid[y + 1:y + size])
+        t = sum(grid[y][cx] for cx in range(x, x+size))
+        l = sum(grid[cy][x] for cy in range(y + 1, y + size))
         res = t + l + section_size((x + 1, y + 1, size - 1))
         memo_dict[coord] = res
         return res
@@ -52,4 +51,4 @@ part_2 = max(((x, y, s)
               for y in range(300 - s)),
              key=section_size)
 
-print('Part 2:', part_2)
+print('Part 2:', conv(part_2))
