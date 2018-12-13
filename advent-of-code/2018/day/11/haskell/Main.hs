@@ -14,23 +14,23 @@ powerLevel x y =
 matrix :: Array (Int,Int,Int) Int
 matrix =
     array
-        ((1, 0, 0), (299, 299, 299))
-        [ ((s, y, x), fn s y x)
-        | s <- [1 .. 299]
-        , y <- [0 .. 299]
-        , x <- [0 .. 299] ]
+        ((1, 1, 1), (300, 300, 300))
+        [ ((x, y, s), fn x y s)
+        | x <- [1 .. 300]
+        , y <- [1 .. 300]
+        , s <- [1 .. 300] ]
   where
-    fn 1 y x = powerLevel (x + 1) (y + 1)
-    fn s y x =
+    fn x y 1 = powerLevel x y
+    fn x y s =
         let t =
                 sum
-                    [ matrix ! (1, y, cx)
+                    [ matrix ! (cx, y, 1)
                     | cx <- [x .. x + s - 1] ]
             l =
                 sum
-                    [ matrix ! (1, cy, x)
+                    [ matrix ! (x, cy, 1)
                     | cy <- [y + 1 .. y + s - 1] ]
-        in t + l + matrix ! (s - 1, y + 1, x + 1)
+        in t + l + matrix ! (x + 1, y + 1, s - 1)
 
 maximumOn :: Ord b => (a -> b) -> [a] -> a
 maximumOn key xs = fromJust $ foldr f (fmap fst) xs Nothing
@@ -46,12 +46,11 @@ maximumOn key xs = fromJust $ foldr f (fmap fst) xs Nothing
 answer :: (Int, Int, Int)
 answer =
     maximumOn
-        (\(x,y,s) ->
-              matrix ! (s, y, x))
+        (matrix !)
         [ (x, y, s)
-        | s <- [1 .. 299]
-        , x <- [0 .. 299 - s]
-        , y <- [0 .. 299 - s] ]
+        | s <- [1 .. 300]
+        , x <- [1 .. 300 - s]
+        , y <- [1 .. 300 - s] ]
 
 main :: IO ()
 main = print answer
