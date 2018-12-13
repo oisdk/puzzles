@@ -2,15 +2,17 @@
 {-# LANGUAGE OverloadedStrings      #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE GADTs #-}
 {-# OPTIONS_GHC -fno-warn-unticked-promoted-constructors #-}
 
 module Main where
 
 import Prelude hiding (lookup)
 import           Control.Applicative
-import           Data.Attoparsec.ByteString.Char8
+import           Data.Attoparsec.ByteString.Char8 hiding (take)
 import qualified Data.ByteString                  as ByteString
 import           Data.Kind
+import Data.Foldable
 
 data Env
   = Env Bool Bool Bool Bool Bool deriving Show
@@ -21,7 +23,10 @@ data N = Z | S N
 
 type family RuleTree (n :: N) = (tr :: Type) | tr -> n where
     RuleTree Z = Bool
-    RuleTree (S n) = (RuleTree n, RuleTree n)
+    RuleTree (S n) = RuleNode n
+
+data RuleNode (n :: N) where
+    (:*:) :: {-# UNPACK #-} !(RuleTree n) -> {-# UNPACK #-} !(RuleTree n) -> RuleNode n
 
 class KnownRule (n :: N) where
     type Builder n :: Type
@@ -43,13 +48,13 @@ instance KnownRule Z where
 instance KnownRule n => KnownRule (S n) where
     type Builder (S n) = (Bool, Builder n)
     type Curried (S n) r = Bool -> Curried n r
-    build = (build, build)
+    build = build :*: build
     {-# INLINE build #-}
-    insert (False, xs) (l, r) = (insert xs l, r)
-    insert (True , xs) (l, r) = (l, insert xs r)
+    insert (False , xs) (l :*: r) = insert xs l :*: r
+    insert ( True , xs) (l :*: r) = l :*: insert xs r
     {-# INLINE insert #-}
-    lookup (l , _) False = lookup l
-    lookup (_ , r) True  = lookup r
+    lookup (l :*: _) False = lookup l
+    lookup (_ :*: r) True  = lookup r
     {-# INLINE lookup #-}
 
 type Five = S (S (S (S (S Z))))
@@ -124,4 +129,8 @@ main = do
     (ste,rls) <- readInput
     let tree = envRules rls
     print (answer 20 ste tree)
-    print (answer 50000000000 ste tree)
+    let steps = iterate (step tree) ste
+    let chunks = take 100 (map head (iterate (drop 100) (zip [0..] steps)))
+    for_ chunks $ \(i, xs) -> do
+        print i
+        print (sum (map snd (filter fst (zip xs [(i * (-2)) ..]) )))
